@@ -10,28 +10,28 @@ import threading
 board = MultiWii("/dev/ttyUSB0") # init flight controller 
 
 thr_reset = False # throttle reset flag
-thr_val = 0 
+ch_val = 0 
 
 def throttle():  # throttle control function
         while True:
-            data = [1000,1000,1000,thr_val]
+            data = ch_val
             board.sendCMD(8,MultiWii.SET_RAW_RC,data)
             sleep(0.05)
-            print(thr_val)
+            print(ch_val)
             if thr_reset:
                 print("Throttle killed")
                 break
 
-def changeThrottle(val): # throttle change function
-    global thr_val
-    thr_val = val
+def changeThrottle(val,pit,rol,ya): # throttle change function
+    global ch_val
+    ch_val = [rol,pit,ya,val]
 
 
 class ThrottleView(APIView): # throttle API view
       
 
     def post(self,request,format=None): # http post function for throttle
-        changeThrottle(int(request.data["thr"]))
+        changeThrottle(int(request.data["thr"]),int(request.data["pitch"]),int(request.data["roll"]),int(request.data["yaw"]))
 
         return Response(status=status.HTTP_200_OK)
 
